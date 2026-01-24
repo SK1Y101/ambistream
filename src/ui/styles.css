@@ -1,0 +1,266 @@
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: #111;
+    color: #eee;
+}
+
+header {
+    padding: 1rem;
+    background: #1c1c1c;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#weather_and_date {
+    text-align: center;
+}
+
+#statuses {
+    text-align: right;
+}
+
+#system-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #666;
+    display: inline-block;
+}
+
+.status-dot.running {
+    background: #3fb950;
+}
+
+.status-dot.connected {
+    background: #3fb950;
+}
+
+.status-dot.startup {
+    background: #d29922;
+}
+
+.status-dot.connecting {
+    background: #d29922;
+}
+
+.status-dot.no-data {
+    background: #e58035;
+}
+
+.status-dot.error {
+    background: #f85149;
+}
+
+.status-dot.connection-lost {
+    background: #f85149;
+}
+
+.status-dot.shutdown {
+    background: #8b949e;
+}
+
+.status-dot.unknown {
+    background: #666;
+}
+
+main {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+section {
+    background: #1a1a1a;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.song-card {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #222;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.song-card img {
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem;
+    cursor: pointer;
+    border-bottom: 1px solid #333;
+}
+
+li:hover {
+    background: #2a2a2a;
+}
+
+/* Song select row */
+#song-select {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.select-block {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 160px;
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.select-block input,
+.select-block select {
+    width: 100%;
+}
+
+.select-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+/* Modify area */
+#modify {
+    grid-column: 1 / -1;
+}
+
+#modify-empty {
+    opacity: 0.6;
+    font-style: italic;
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+#modify form {
+    display: grid;
+    grid-template-columns: 0.8fr 1fr 1fr;
+    gap: 1rem;
+}
+
+#modify img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.modify-main label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.tickboxes {
+    display: flex;
+    gap: 1rem;
+    margin: 0.5rem 0;
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.4rem;
+}
+
+.buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+button {
+    background: #333;
+    color: #eee;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+button:hover {
+    background: #444;
+}
+
+button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(40%);
+}
+
+button:disabled:hover {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(40%);
+}
+
+button:disabled::after {
+    content: " ⏳";
+    font-size: 0.9em;
+}
+
+.rule-allow {
+    color: #7ddc7d;
+}
+
+.rule-ban {
+    color: #dc7d7d;
+}
+
+.rule-checkbox input:checked+span {
+    font-weight: 600;
+}
+
+#save-status {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.rule-block {
+    transition: opacity 0.2s ease;
+}
+
+.rule-block.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.rule-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rule-lock {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}

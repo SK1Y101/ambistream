@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Ambistream</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+    <header>
+        <div id="title">
+            <h1>Ambistream</h1>
+            <p>By Skye</p>
+        </div>
+
+        <div id="weather_and_date">
+            <h3 id="weather">Unknown</h3>
+            <div id="datetime"></div>
+        </div>
+
+        <div id="statuses">
+            <div>
+                <span id="player-status-text">Unknown</span>
+                <span id="player-status" class="status-dot unknown"></span>
+                <span style="width: 4rem; display: inline-block;">Player</span>
+            </div>
+            <div>
+                <span id="weather-status-text">Unknown</span>
+                <span id="weather-status" class="status-dot unknown"></span>
+                <span style="width: 4rem; display: inline-block;">Weather</span>
+            </div>
+            <div>
+                <span id="backend-status-text">Unknown</span>
+                <span id="backend-status" class="status-dot unknown"></span>
+                <span style="width: 4rem; display: inline-block;">Backend</span>
+            </div>
+
+        </div>
+    </header>
+
+    <main>
+        <!-- Top row -->
+        <section id="now-playing">
+            <h2>Now Playing</h2>
+            <div class="song-card" id="current-song"></div>
+        </section>
+
+        <section id="queue">
+            <h2>Queue</h2>
+            <ul id="queue-list"></ul>
+        </section>
+
+        <section id="history">
+            <h2>History</h2>
+            <ul id="history-list"></ul>
+        </section>
+
+        <!-- Middle row -->
+        <section id="song-select">
+            <div class="select-block">
+                <label>
+                    <span>URL</span>
+                    <input type="text" id="url-input" placeholder="Enter song URL" />
+                </label>
+
+                <div class="select-buttons">
+                    <button id="load-url-modify">Load to Modify</button>
+                    <button id="load-url-queue">Load to Queue</button>
+                </div>
+            </div>
+
+            <div class="select-block">
+                <label>
+                    <span>Database</span>
+                    <select id="db-select"></select>
+                </label>
+
+                <div class="select-buttons">
+                    <button id="load-db-modify">Load to Modify</button>
+                    <button id="load-db-queue">Load to Queue</button>
+                </div>
+            </div>
+            <span id="dl-status" class="status-text">Status: Idle</span>
+        </section>
+
+        <!-- Bottom row -->
+        <section id="modify">
+            <h2>Modify</h2>
+            <div id="modify-empty">
+                Select a song from Queue, History, URL, or the Database
+            </div>
+
+
+            <form id="modify-form">
+                <!-- Column 1 -->
+                <div class="modify-main">
+                    <img id="mod-thumbnail" src="placeholder.jpg" alt="Artwork" />
+
+                    <label>
+                        <span style="width:3rem; display: inline-block;">Title</span>
+                        <input type="text" id="mod-title" disabled style="width: 85%;" />
+                    </label>
+
+                    <label>
+                        <span style="width:3rem; display: inline-block;">URL</span>
+                        <input type="text" id="mod-url" disabled style="width: 85%;" />
+                    </label>
+
+                    <div class="tickboxes">
+                        <label><input type="checkbox" id="mod-main" /> Main</label>
+                        <label><input type="checkbox" id="mod-fallback" /> Fallback</label>
+                    </div>
+                    <div class="rule-block disabled" id="pinned-block">
+                        <label class="rule-checkbox">
+                            <input type="checkbox" value="clear" id="mod-pinned">
+                            <span>Pinned</span>
+                            <span class="rule-lock" title="Pinned applies only apply to main songs">
+                                🔒 Main only
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="buttons">
+                        <button type="button" id="save-state">Save State</button>
+                        <button type="button" id="enqueue">Queue</button>
+                        <button type="button" id="clear">Clear</button>
+                    </div>
+
+                    <div id="save-status"></div>
+                </div>
+
+                <!-- Column 2 -->
+                <div class="rule-block disabled" id="weather-block">
+                    <div class="rule-header">
+                        <h3>Weather</h3>
+                        <span class="rule-lock" title="Weather and time rules only apply to main songs">
+                            🔒 Main only
+                        </span>
+                    </div>
+                    <h4 class="rule-allow">Allow</h4>
+                    <div id="mod-weather-prefer" class="checkbox-grid"></div>
+                    <h4 class="rule-ban">Ban</h4>
+                    <div id="mod-weather-ban" class="checkbox-grid"></div>
+                </div>
+
+                <div class="rule-block disabled" id="time-block">
+                    <div class="rule-header">
+                        <h3>Time</h3>
+                        <span class="rule-lock" title="Weather and time rules only apply to main songs">
+                            🔒 Main only
+                        </span>
+                    </div>
+                    <h4 class="rule-allow">Allow</h4>
+                    <div id="mod-time-prefer" class="checkbox-grid"></div>
+                    <h4 class="rule-ban">Ban</h4>
+                    <div id="mod-time-ban" class="checkbox-grid"></div>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,9 @@
+PyYAML
+fastapi
+filelock
+mutagen
+requests
+types-PyYAML
+types-requests
+watchdog
+yt-dlp

@@ -1,0 +1,8 @@
+weather_api_key: paste_your_open_weather_map_api_key_here
+location:
+  # add by city
+  country: write_your_country_here
+  city: write_your_city_here
+  # or add by lat/lon.
+  latitude: write_your_latitude_here
+  longitude: write_your_longitude_here
