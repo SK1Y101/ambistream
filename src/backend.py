@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager, contextmanager
 from datetime import timedelta
 from enum import Enum
 from json import dumps
+from logging import INFO
 from pathlib import Path
 from typing import AsyncGenerator, Generator, Optional
 
@@ -432,4 +433,6 @@ if __name__ == "__main__":
     import uvicorn
 
     LOG.debug("backend starting")
-    uvicorn.run(app=app)
+    config = uvicorn.Config(app=app, log_config=None, log_level=INFO, access_log=True)
+    server = uvicorn.Server(config=config)
+    server.run()

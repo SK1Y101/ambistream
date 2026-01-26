@@ -1,3 +1,8 @@
+import os
+import shutil
+from pathlib import Path
+from subprocess import Popen
+
 import nox
 
 req_file = "requirements.txt"
@@ -5,6 +10,38 @@ req_file = "requirements.txt"
 code_directories = ["src"]
 lint_directories = ["noxfile.py"] + code_directories
 format_directories = lint_directories
+
+
+@nox.session
+def run(session: nox.session) -> None:
+    """Run UI, orchestrator, and player in parallel."""
+    commands = [
+        ["nox", "-s", "ui"],
+        ["nox", "-s", "orchestrator"],
+        ["nox", "-s", "player"],
+    ]
+
+    procs: list[Popen] = []
+
+    Path("application.log").unlink(missing_ok=True)
+
+    try:
+        print("Launching sub-programs...")
+        for cmd in commands:
+            proc = Popen(cmd)
+            procs.append(proc)
+
+        print("Launched sub-programs, Ctrl+C to stop.")
+
+        for proc in procs:
+            proc.wait()
+
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt received. Stopping sub-programs...")
+        for proc in procs:
+            proc.terminate()
+        for proc in procs:
+            proc.wait()
 
 
 @nox.session
@@ -89,8 +126,6 @@ def mypy(session: nox.session) -> None:
 @nox.session
 def clean(session: nox.session) -> None:
     """Cleanup any created items."""
-    import os
-    import shutil
 
     def delete(directory):
         shutil.rmtree(directory, ignore_errors=True)
