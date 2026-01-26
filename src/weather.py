@@ -254,7 +254,9 @@ class WeatherHandler:
         return self._weather
 
     def close(self) -> None:
+        self.state.clear_weather()
         self.state.set_status(Status.shutdown)
 
     def error(self) -> None:
+        self.state.clear_weather()
         self.state.set_status(Status.error)

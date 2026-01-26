@@ -26,6 +26,10 @@ let player_running = null;
 let lastState = new Date();
 let SongLoadInFlight = false;
 
+let renderingCurrent = false;
+let renderingQueue = false;
+let renderingHistory = false;
+
 // random utils
 
 function capitalise(text) {
@@ -57,25 +61,26 @@ const thumbnailCache = new Map(); // filepath -> objectURL | null
 
 async function getThumbnail(filepath) {
     if (!filepath) return PLACEHOLDER;
+    filename = filepath.replace(/^.*(\\|\/|\:)/, '');
 
-    if (thumbnailCache.has(filepath)) {
-        return thumbnailCache.get(filepath) ?? PLACEHOLDER;
+    if (thumbnailCache.has(filename)) {
+        return thumbnailCache.get(filename) ?? PLACEHOLDER;
     }
 
     try {
         const res = await fetch(`/songs/thumbnail?filepath=${encodeURIComponent(filepath)}`);
         if (!res.ok) {
-            thumbnailCache.set(filepath, null);
+            thumbnailCache.set(filename, null);
             return PLACEHOLDER;
         }
 
         const blob = await res.blob();
         const objectUrl = URL.createObjectURL(blob);
-        thumbnailCache.set(filepath, objectUrl);
+        thumbnailCache.set(filename, objectUrl);
         return objectUrl;
 
     } catch {
-        thumbnailCache.set(filepath, null);
+        thumbnailCache.set(filename, null);
         return PLACEHOLDER;
     }
 }
@@ -114,32 +119,20 @@ function renderStatus() {
 
 function estimateTime() {
     const now = new Date();
-    if (now.getHours() < 6) {
-        return "night";
-    }
-    if (now.getHours() < 7 && now.getMinutes() <= 30) {
-        return "dawn";
-    }
-    if (now.getHours() < 12) {
-        return "morning";
-    }
-    if (now.getHours() < 18) {
-        return "day";
-    }
-    if (now.getHours() < 19 && now.getMinutes() <= 30) {
-        return "dusk";
-    }
-    if (now.getHours() < 20) {
-        return "dusk";
-    }
-    return "night";
+    if (now.getHours() < 6) return "night";
+    else if (now.getHours() < 7 && now.getMinutes() <= 30) return "dawn";
+    else if (now.getHours() < 12) return "morning";
+    else if (now.getHours() < 18) return "day";
+    else if (now.getHours() < 19 && now.getMinutes() <= 30) return "dusk";
+    else if (now.getHours() < 20) return "dusk";
+    else return "night";
 }
 
 function renderWeather() {
     let weather = "missing weather";
     let time = estimateTime();
 
-    if (state.weather) {
+    if (state?.weather) {
         weather = state.weather.description ?? "unknown weather condition";
         time = state.weather.timeperiod ?? "unknown time period";
     }
@@ -147,70 +140,99 @@ function renderWeather() {
     qs("weather").textContent = `${capitalise(weather)} - ${capitalise(time)}`;
 }
 
+async function create_song_card(element, item) {
+    element.replaceChildren();
+
+    const title_item = document.createElement("span");
+    title_item.textContent = item.title;
+
+    const image = document.createElement("img");
+    image.src = await getThumbnail(item.filepath);
+
+    element.classList.add("song-card");
+    element.appendChild(image);
+    element.appendChild(title_item);
+
+    element.onclick = async () => loadIntoModify(await fetchSongByUrl(item.url));
+
+    return element;
+}
+
 async function renderCurrent() {
-    const el = qs("current-song");
-    el.innerHTML = "";
+    if (renderingCurrent) return;
+    renderingCurrent = true
+    try {
+        const el = qs("current-song");
+        el.replaceChildren();
 
-    if (!state.current) {
-        el.textContent = "Nothing playing";
-        return;
+        if (!state.current) {
+            el.textContent = "Nothing playing";
+            return;
+        }
+
+        await create_song_card(el, state.current);
     }
-
-    const imgSrc = await getThumbnail(state.current.filepath);
-
-    el.innerHTML = `
-        <div class="song-card">
-            <img src="${imgSrc}" alt="">
-            <span>${state.current.title}</span>
-        </div>
-    `;
+    finally { renderingCurrent = false; }
 }
 
 async function renderQueue() {
-    const ul = qs("queue-list");
-    ul.innerHTML = "";
+    if (renderingQueue) return;
+    renderingQueue = true;
 
-    if (!state.queue) return;
+    try {
+        const el = qs("queue-list");
+        el.replaceChildren();
 
-    for (const item of state.queue) {
-        const li = document.createElement("li");
-        const imgSrc = await getThumbnail(item.filepath);
+        if (!state.queue) return;
 
-        li.innerHTML = `
-            <div class="song-card">
-                <img src="${imgSrc}" alt="">
-                <span>${item.title}</span>
-            </div>
-        `;
-
-        li.onclick = () => loadIntoModify(item);
-        ul.appendChild(li);
-    }
+        for (const item of state.queue) {
+            const li = document.createElement("li");
+            const div = await create_song_card(document.createElement("div"), item);
+            li.appendChild(div);
+            el.appendChild(li);
+        }
+    } finally {
+        renderingQueue = false;
+    };
 }
 
 async function renderHistory() {
-    const ul = qs("history-list");
-    ul.innerHTML = "";
+    if (renderingHistory) return;
+    renderingHistory = true;
 
-    if (!state.history) return;
+    try {
+        const el = qs("history-list");
+        el.replaceChildren();
 
-    for (const item of state.history) {
-        const li = document.createElement("li");
-        const imgSrc = await getThumbnail(item.filepath);
+        if (!state.history) return;
 
-        li.innerHTML = `
-            <div class="song-card">
-                <img src="${imgSrc}" alt="">
-                <span>${item.title}</span>
-            </div>
-        `;
-
-        li.onclick = () => loadIntoModify(item);
-        ul.appendChild(li);
+        for (const item of state.history) {
+            const li = document.createElement("li");
+            const div = await create_song_card(document.createElement("div"), item);
+            li.appendChild(div);
+            el.appendChild(li);
+        }
+    } finally {
+        renderingHistory = false;
     }
 }
 
 // do the rules
+
+function formatCheck(label, containerId) {
+    const input = label.querySelector("input");
+    const span = label.querySelector("span");
+
+    if (input.checked) {
+        if (containerId.includes("prefer")) {
+            span.className = "rule-allow";
+        } else {
+            span.className = "rule-ban";
+        }
+    } else {
+        span.className = "";
+    }
+}
 
 function renderRuleCheckboxes(containerId, values, selectedValues = []) {
     const el = qs(containerId);
@@ -228,7 +250,11 @@ function renderRuleCheckboxes(containerId, values, selectedValues = []) {
         input.checked = selectedValues.includes(v);
         input.id = id;
 
+        const span = document.createElement("span");
+        span.textContent = v;
+
         input.onchange = () => {
+            formatCheck(label, containerId);
             if (!input.checked) return;
 
             const otherContainer =
@@ -239,15 +265,15 @@ function renderRuleCheckboxes(containerId, values, selectedValues = []) {
             qs(otherContainer)
                 .querySelectorAll(`input[value="${v}"]`)
                 .forEach(i => i.checked = false);
+            qs(otherContainer).querySelectorAll("label.rule-checkbox").forEach(otherLabel => {
+                formatCheck(otherLabel, otherContainer);
+            });
         };
-
-
-        const span = document.createElement("span");
-        span.textContent = v;
 
         label.appendChild(input);
         label.appendChild(span);
         el.appendChild(label);
+        formatCheck(label, containerId);
     });
 }
 
@@ -415,6 +441,9 @@ async function saveState() {
 
 async function enqueue(statusElement = "save-status") {
     if (!selected) return;
+    if (typeof statusElement !== "string") {
+        statusElement = "save-status";
+    }
 
     if (backendStatus == "connection-lost") {
         setTextStatus("Cannot communicate with backend", statusElement ?? "save-status");
@@ -428,12 +457,20 @@ async function enqueue(statusElement = "save-status") {
 
     try {
         setTextStatus("Queueing...", statusElement ?? "save-status");
-        await fetch("/queue", {
+        res = await fetch("/queue", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url: selected.url })
         });
-        setTextStatus("Queued song", statusElement ?? "save-status");
+        if (!res.ok) {
+            if (res.status == 409) {
+                setTextStatus("Song already in queue", statusElement ?? "save-status");
+            } else {
+                setTextStatus("Song Queue failed", statusElement ?? "save-status");
+            }
+        } else {
+            setTextStatus("Queued song", statusElement ?? "save-status");
+        }
     } catch {
         setTextStatus("Queue failed", statusElement ?? "save-status");
     };
@@ -521,10 +558,7 @@ async function populateDBSongs() {
     default_option.value = NO_SONG;
     default_option.textContent = NO_SONG;
 
-    // clear existing options except placeholder
-    while (select.firstChild) {
-        select.removeChild(select.lastChild);
-    }
+    select.replaceChildren();
     select.appendChild(default_option);
 
     const response = await fetch("/songs/all");
@@ -624,6 +658,9 @@ function initialiseDateTime() {
     function setdate() {
         const date = new Date();
         qs("datetime").textContent = date.toLocaleTimeString("en-GB");
+
+        renderStatus();
+        renderWeather();
     }
     setdate();
     setInterval(setdate, 1000);
@@ -690,7 +727,6 @@ async function init() {
                 render();
                 break;
         };
-        renderStatus();
     };
     es.onopen = () => {
         backendStatus = "connecting";

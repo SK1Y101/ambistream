@@ -22,19 +22,19 @@
 
         <div id="statuses">
             <div>
-                <span id="player-status-text">Unknown</span>
+                <span class="status-name">Player</span>
                 <span id="player-status" class="status-dot unknown"></span>
-                <span style="width: 4rem; display: inline-block;">Player</span>
+                <span class="status-text" id="player-status-text">Unknown</span>
             </div>
             <div>
-                <span id="weather-status-text">Unknown</span>
+                <span class="status-name">Weather</span>
                 <span id="weather-status" class="status-dot unknown"></span>
-                <span style="width: 4rem; display: inline-block;">Weather</span>
+                <span class="status-text" id="weather-status-text">Unknown</span>
             </div>
             <div>
-                <span id="backend-status-text">Unknown</span>
+                <span class="status-name">Backend</span>
                 <span id="backend-status" class="status-dot unknown"></span>
-                <span style="width: 4rem; display: inline-block;">Backend</span>
+                <span class="status-text" id="backend-status-text">Unknown</span>
             </div>
 
         </div>
@@ -139,9 +139,13 @@
                             🔒 Main only
                         </span>
                     </div>
-                    <h4 class="rule-allow">Allow</h4>
+                    <h4 class="rule-allow"
+                        title="Songs with any of these weathers will be prioritised when the current weather matches">
+                        Prefer</h4>
                     <div id="mod-weather-prefer" class="checkbox-grid"></div>
-                    <h4 class="rule-ban">Ban</h4>
+                    <h4 class="rule-ban"
+                        title="Songs with any of these weathers will be disallowed when the current weather matches">Ban
+                    </h4>
                     <div id="mod-weather-ban" class="checkbox-grid"></div>
                 </div>
 
@@ -152,9 +156,12 @@
                             🔒 Main only
                         </span>
                     </div>
-                    <h4 class="rule-allow">Allow</h4>
+                    <h4 class="rule-allow"
+                        title="Songs with any of these times will be prioritised when the current time matches">Prefer
+                    </h4>
                     <div id="mod-time-prefer" class="checkbox-grid"></div>
-                    <h4 class="rule-ban">Ban</h4>
+                    <h4 class="rule-ban"
+                        title="Songs with any of these times will be disallowed when the current time matches">Ban</h4>
                     <div id="mod-time-ban" class="checkbox-grid"></div>
                 </div>
             </form>

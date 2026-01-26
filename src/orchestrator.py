@@ -32,13 +32,13 @@ LOG = get_logger("orchestrator")
 
 class config:
     def __init__(
-        self, api_key: str, country: Optional[str] = None, city: Optional[str] = None
+        self, weather_api_key: str, location: dict[str, Optional[str]]
     ) -> None:
-        self.api_key = api_key
-        self.country = country
-        self.city = city
+        self.api_key = weather_api_key
+        self.country = location.get("country")
+        self.city = location.get("city")
 
-        self.citycountry = (city is not None) and (country is not None)
+        self.citycountry = (self.city is not None) and (self.country is not None)
 
         if not self.citycountry:
             raise ValueError("You must define a complete location pair (city/country)")
@@ -103,12 +103,16 @@ def sort_songs(SH: SongHandler, WH: WeatherHandler) -> dict[float, list[Song]]:
 
     # remove any songs already in the queue, we can't have duplicate files
     queue = SH.queue_songs
-    songs = [song for song in songs if song.filepath.name not in queue]
+    unqueued_songs = [song for song in songs if song.filepath.name not in queue]
 
-    LOG.debug(f"scoring {len(songs)} candidate songs")
+    if not unqueued_songs:
+        LOG.error("No songs are valid to be played")
+        return {}
+
+    LOG.debug(f"scoring {len(unqueued_songs)} candidate songs")
 
     ranking: dict[float, list[Song]] = {}
-    for song in songs:
+    for song in unqueued_songs:
         weather_score = (
             min(
                 weather_distance(weather.weather, get_weather(pref))
@@ -155,7 +159,8 @@ def sort_songs(SH: SongHandler, WH: WeatherHandler) -> dict[float, list[Song]]:
         )
 
     LOG.debug(
-        f"ranked {len(songs)} with scores range {min(ranking):.2f}-{max(ranking):.2f}"
+        f"ranked {len(unqueued_songs)} with scores "
+        f"range {min(ranking):.2f}-{max(ranking):.2f}"
     )
 
     return dict(sorted(ranking.items()))
@@ -232,6 +237,9 @@ def main():
     except KeyboardInterrupt:
         WH.close()
         LOG.info("orchestrator shutdown")
+    except Exception as e:
+        LOG.exception(e, exc_info=True)
+        WH.error()
 
 
 if __name__ == "__main__":

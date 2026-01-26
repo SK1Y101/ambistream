@@ -282,7 +282,13 @@ class Backend:
                 song_object = (
                     song or fallback or self.song_handler.download_song(payload.url)
                 )
-                self.song_handler.play_song(song_object)
+                try:
+                    self.song_handler.play_song(song_object)
+                except FileExistsError:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail="Cannot queue song that already is in the queue",
+                    )
                 return Response(status_code=status.HTTP_202_ACCEPTED)
 
         @app.delete("/queue")
@@ -341,7 +347,8 @@ class Backend:
                         time=time,
                     )
 
-                self.song_handler.ensure(saved_song)
+                if saved_song:
+                    self.song_handler.ensure(saved_song)
 
                 return Response(status_code=status.HTTP_202_ACCEPTED)
 
@@ -381,7 +388,8 @@ class Backend:
                         song_from_state,
                     )
 
-                self.song_handler.ensure(saved_song)
+                if saved_song:
+                    self.song_handler.ensure(saved_song)
 
                 return Response(status_code=status.HTTP_202_ACCEPTED)
 

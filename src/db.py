@@ -224,7 +224,7 @@ class Database:
                 self.release_stale_lock()
                 with self._lock:
                     with self._lock_internal:
-                        self._reload_if_changed
+                        self._reload_if_changed()
                         yield
                         return
             except Timeout:
@@ -323,15 +323,20 @@ class Database:
     # extra methods to update metadata
 
     def add_played(self, song: Song | FallbackSong) -> None:
-        song.last_played = datetime.now()
         if isinstance(song, Song):
-            self.update(song)
+            if sng := self.song_by_url(song.url):
+                sng.play_count += 1
+                sng.last_played = datetime.now()
+                self.update(sng)
         elif isinstance(song, FallbackSong):
-            self.update_fallback(song)
+            if fb := self.fallback_by_url(song.url):
+                fb.last_played = datetime.now()
+                self.update_fallback(fb)
 
     def add_dequeued(self, song: Song) -> None:
-        song.last_dequeued = datetime.now()
-        self.update(song)
+        if sng := self.song_by_url(song.url):
+            sng.last_dequeued = datetime.now()
+            self.update(sng)
 
     # methods to find database objects
 
@@ -351,17 +356,17 @@ class Database:
                 return song
         return None
 
-    def song_by_filename(self, filename: str) -> Song | None:
+    def song_by_filename(self, song_file: str | Path) -> Song | None:
+        filename = song_file if isinstance(song_file, str) else song_file.stem
         for song in self.songs.values():
             if song.filepath.stem == filename:
                 return song
         return None
 
-    def song_by_filepath(self, filepath: Path) -> Song | None:
-        for song in self.songs.values():
-            if song.filepath.samefile(filepath):
-                return song
-        return None
+    def fallback_by_obj(self, obj: Song | FallbackSong) -> FallbackSong:
+        if song := self.fallback_songs.get(obj.url):
+            return song
+        raise FileNotFoundError(f"Song {obj.title} not in database")
 
     def fallback_by_url(self, url: str) -> FallbackSong | None:
         for song in self.fallback_songs.values():
@@ -375,7 +380,8 @@ class Database:
                 return song
         return None
 
-    def fallback_by_filename(self, filename: str) -> FallbackSong | None:
+    def fallback_by_filename(self, song_file: str | Path) -> FallbackSong | None:
+        filename = song_file if isinstance(song_file, str) else song_file.stem
         for song in self.fallback_songs.values():
             if song.filepath.stem == filename:
                 return song

@@ -237,6 +237,7 @@ class SongHandler:
             LOG.debug(f"adding song '{song.title}' to play queue")
             self.ensure(song)
             self.safe_copy(song.filepath, QUEUE)
+            return
         raise FileExistsError(f"Song {song.filepath.name} already queued")
 
     def promote_fallback(

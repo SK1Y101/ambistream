@@ -28,6 +28,17 @@ header {
     font-size: 0.85rem;
 }
 
+.status-text {
+    width: 5rem;
+    display: inline-block;
+    text-align: left;
+}
+
+.status-name {
+    width: 4rem;
+    display: inline-block;
+}
+
 .status-dot {
     width: 10px;
     height: 10px;
@@ -228,11 +239,11 @@ button:disabled::after {
 }
 
 .rule-allow {
-    color: #7ddc7d;
+    color: #7ddc7d !important;
 }
 
 .rule-ban {
-    color: #dc7d7d;
+    color: #dc7d7d !important;
 }
 
 .rule-checkbox input:checked+span {
